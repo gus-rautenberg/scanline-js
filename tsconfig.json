@@ -6,6 +6,6 @@
     "rootDir": "./",
     "strict": true
   },
-  "include": ["app.ts"],
+  "include": ["scanline-js/app.ts"],
   "exclude": ["node_modules"]
 }

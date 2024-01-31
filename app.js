@@ -325,8 +325,8 @@ function fillPoly(poly, ctx) {
         let edge = intersections.get(currentY);
     
         for (let i = 0; i < edge.length; i += 2) {
-            let initialX = edge[i].x;
-            let endX = edge[i + 1].x;
+            let initialX = Math.ceil(edge[i].x);
+            let endX = Math.floor(edge[i + 1].x);
             let currentR = edge[i].r;
             let currentG = edge[i].g;
             let currentB = edge[i].b;

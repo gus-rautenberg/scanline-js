@@ -9,8 +9,13 @@ canvas {
     border: 1px solid #000;
     margin-right: 10px; /* Adiciona margem à direita do canvas */
     background-color: #8c92ac;
+    cursor: crosshair;
     /* #ECEBE9; */
   }
+
+button {
+  cursor: pointer;
+}
 
 #controls {
     display: flex;

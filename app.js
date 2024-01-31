@@ -33,9 +33,9 @@ class Poly {
         this.Edge = "rgb(0, 0, 0)";
     }
 
-    sortVerticesByY() {
-        this.vertices.sort((a, b) => b.y - a.y);
-    }
+    // sortVerticesByY() {
+    //     this.vertices.sort((a, b) => b.y - a.y);
+    // }
     extractRGB() {
         // Remove os caracteres "rgb(" e ")" da string
         const values = this.Edge.substring(4, this.Edge.length - 1).split(', ');
@@ -92,7 +92,7 @@ canvas.addEventListener('click', function (event) {
     if (currentPoly.vertices.length === 3) {
         drawTriangle(context, currentPoly.vertices, currentPoly.Edge);
         currentPoly.name = "T" + count++;
-        currentPoly.sortVerticesByY();
+        // currentPoly.sortVerticesByY();
         listaPoly.push(currentPoly);
         console.log("TEste 1")
         console.log('Triangle:', currentPoly.vertices[0].extractRGB().r);

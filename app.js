@@ -146,13 +146,11 @@ function updateTriangleTable() {
         idCell.textContent = triangle.name;
 
         const createColorInput = (value, onchange) => {
-            console.log('value')
-            console.log(value)
             const hexColor = rgbToHex(parseInt(value.r), parseInt(value.g), parseInt(value.b))
             const input = document.createElement('input');
             input.type = 'color';
             input.value = hexColor;
-            input.addEventListener('input', onchange);
+            input.addEventListener('change', onchange); // Mudança para o evento 'change'
             return input;
         };
         // console.log(triangle.vertices[0].color)

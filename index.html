@@ -1,61 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Draw Triangle</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start; /* Alinha os itens no topo */
-    }
-    canvas {
-      border: 1px solid #000;
-      margin-right: 10px; /* Adiciona margem à direita do canvas */
-    }
-    #controls {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start; 
-    }
-    #triangleTableContainer {
-      align-items: flex-start;
-      overflow-y: auto; /* Adiciona scrollbar vertical quando necessário */
-      border: 1px solid #000;
-      width: 400px; /* Define uma largura fixa para a tabela */
-      height: 150px; /* Define uma altura fixa para a tabela */
-      margin-bottom: 10px; /* Adiciona margem inferior à tabela */
-    }
-    #triangleTable {
-      width: 100%; /* Largura agora é 100% do contêiner */
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@luiz.rosa8</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <canvas id="myCanvas"></canvas>
+<body class="dark-mode">
+    <canvas id="myCanvas"></canvas>
   
-  <div id="controls">
-    <div id="triangleTableContainer">
-      <table id="triangleTable">
-        <tr>
-          <th>ID</th>
-          <th>Vertex 1</th>
-          <th>Vertex 2</th>
-          <th>Vertex 3</th>
-          <th>Actions</th>
-        </tr>
+    <div id="controls">
+        <div id="triangleTableContainer">
+        <table id="triangleTable">
+            <tr>
+            <th>ID</th>
+            <th>Vertex 1</th>
+            <th>Vertex 2</th>
+            <th>Vertex 3</th>
+            <th>Edge</th>
+            <th>Actions</th>
+            </tr>
+            
+            <!-- Aqui você pode adicionar dinamicamente as linhas da tabela conforme necessário -->
+        </table>
+        </div>
+
+        <!-- <label for="colorPicker">Escolher Cor:</label>
+        <input type="color" id="colorPicker" value="#0000ff"> Valor padrão é azul -->
         
-        <!-- Aqui você pode adicionar dinamicamente as linhas da tabela conforme necessário -->
-      </table>
+        <button id="clearButton">Limpar Tela</button>
     </div>
-
-    <label for="colorPicker">Escolher Cor:</label>
-    <input type="color" id="colorPicker" value="#0000ff"> <!-- Valor padrão é azul -->
-    
-    <button id="clearButton">Limpar Tela</button>
-  </div>
-
-  <script src="app.js" defer></script>
+    <script src="app.js"></script>
 </body>
 </html>
+

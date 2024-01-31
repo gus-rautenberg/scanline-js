@@ -1,211 +1,337 @@
-// Define a Point class to represent vertices
-var Point = /** @class */ (function () {
-    function Point(x, y, color, id) {
+class Point {
+    constructor(x, y, color) {
         this.x = x;
         this.y = y;
         this.color = color;
-        this.id = id;
     }
-    return Point;
-}());
-// Função para gerar IDs únicos
-function generateUniqueId() {
-    return 'triangle_' + Date.now();
+    extractRGB() {
+        // Remove os caracteres "rgb(" e ")" da string
+        const values = this.color.substring(4, this.color.length - 1).split(', ');
+    
+        // Converte os valores para números inteiros
+        const r = parseInt(values[0]);
+        const g = parseInt(values[1]);
+        const b = parseInt(values[2]);
+    
+        return { r, g, b };
+    }
+    rgbToHex(r, g, b) {
+        // Converte os valores para formato hexadecimal e os concatena
+        const hexR = r.toString(16).padStart(2, '0');
+        const hexG = g.toString(16).padStart(2, '0');
+        const hexB = b.toString(16).padStart(2, '0');
+    
+        // Retorna a string hexadecimal completa
+        return `#${hexR}${hexG}${hexB}`;
+    }
 }
-// Função para desenhar um triângulo no canvas
-function drawTriangle(context, vertices) {
-    if (!context) {
-        console.error('Contexto não disponível.');
-        return;
+
+class Poly {
+    constructor() {
+        this.name = "";
+        this.vertices = [];
+        this.Edge = "rgb(0, 0, 0)";
     }
-    if (vertices.length !== 3) {
-        console.error('Número inválido de vértices. O triângulo precisa de exatamente 3 vértices.');
-        return;
+
+    sortVerticesByY() {
+        this.vertices.sort((a, b) => b.y - a.y);
     }
-    // Move para o primeiro vértice
-    context.beginPath();
-    context.moveTo(vertices[0].x, vertices[0].y);
-    // Desenha linhas para os outros vértices
-    for (var i = 1; i < 3; i++) {
-        context.lineTo(vertices[i].x, vertices[i].y);
-    }
-    // Fecha o caminho para formar um triângulo
-    context.closePath();
-    // Traça o caminho para realmente desenhá-lo
-    context.stroke();
 }
-// Obtém o elemento canvas e seu contexto de renderização 2D
-var canvas = document.getElementById('myCanvas');
-var context = canvas.getContext('2d');
+
+let count = 0;
+let listaPoly = [];
+const canvas = document.getElementById('myCanvas');
+const context = canvas.getContext('2d');
+
 if (!context) {
     // Lida com a situação em que o contexto não está disponível
     throw new Error('Não foi possível obter o contexto 2D do canvas.');
 }
-var windowWidth = window.innerWidth * 0.75;
-var windowHeight = window.innerHeight * 0.75;
+
+const windowWidth = window.innerWidth * 0.75;
+const windowHeight = window.innerHeight * 0.75;
 canvas.width = windowWidth;
 canvas.height = windowHeight;
-// Array para armazenar vértices para cada triângulo
-var triangles = [];
-var currentVertices = [];
-var isDrawing = false;
-// Obtém o elemento colorPicker
-var colorPicker = document.getElementById('colorPicker');
+
+let currentPoly = new Poly();
+
+canvas.addEventListener('click', function (event) {
+    const rect = canvas.getBoundingClientRect();
+    const red = Math.floor(Math.random() * 256);
+    const green = Math.floor(Math.random() * 256);
+    const blue = Math.floor(Math.random() * 256);
+
+    const currentPoint = new Point(
+        event.clientX - rect.left,
+        event.clientY - rect.top,
+        `rgb(${red}, ${green}, ${blue})`
+    );
+
+    currentPoly.vertices.push(currentPoint);
+    // Desenha os vértices para o polígono atual
+    for (const vertex of currentPoly.vertices) {
+        context.beginPath();
+        context.arc(vertex.x, vertex.y, 5, 0, 2 * Math.PI);
+        context.fillStyle = vertex.color;
+        context.fill();
+        context.strokeStyle = currentPoly.Edge;
+        context.stroke();
+    }
+    // Desenha o polígono atual se houverem três vértices presentes
+    if (currentPoly.vertices.length === 3) {
+        drawTriangle(context, currentPoly.vertices, currentPoly.Edge);
+        currentPoly.name = "T" + count++;
+        currentPoly.sortVerticesByY();
+        listaPoly.push(currentPoly);
+        console.log("TEste 1")
+        console.log('Triangle:', currentPoly.vertices[0].extractRGB().r);
+        currentPoly = new Poly();
+        updateTriangleTable();
+        redrawCanvas(context);
+    }
+});
+
+function drawTriangle(ctx, vertices, edge) {
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.moveTo(vertices[0].x, vertices[0].y);
+
+    for (let i = 1; i < 3; i++) {
+        
+        ctx.lineTo(vertices[i].x, vertices[i].y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = edge;
+    ctx.stroke();
+}
+
+const clearButton = document.getElementById('clearButton');
+clearButton.addEventListener('click', clearCanvas);
+
+function clearCanvas() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    listaPoly.length = 0;
+    count = 0;
+    updateTriangleTable()
+}
+
 function updateTriangleTable() {
-    var triangleTable = document.getElementById('triangleTable');
-    // Limpa a tabela, mantendo o cabeçalho
+    const triangleTable = document.getElementById('triangleTable');
+
     while (triangleTable.rows.length > 1) {
         triangleTable.deleteRow(1);
     }
-    var _loop_1 = function (vertices) {
-        var triangleId = vertices[0].id;
-        var row = triangleTable.insertRow();
-        // Cria a célula para o ID do triângulo
-        var cellId = row.insertCell(0);
-        cellId.innerHTML = triangleId;
-        var _loop_2 = function (i) {
-            var cellColor = row.insertCell(i + 1);
-            var colorPicker_1 = document.createElement('input');
-            colorPicker_1.type = 'color';
-            colorPicker_1.value = vertices[i].color;
-            colorPicker_1.addEventListener('input', function (event) { return handleColorChange(triangleId, i, event); });
-            cellColor.appendChild(colorPicker_1);
+
+    listaPoly.forEach((triangle, index) => {
+        const newRow = triangleTable.insertRow();
+
+        const idCell = newRow.insertCell(0);
+        const vertex1Cell = newRow.insertCell(1);
+        const vertex2Cell = newRow.insertCell(2);
+        const vertex3Cell = newRow.insertCell(3);
+        const edgeCell = newRow.insertCell(4);
+        const actionsCell = newRow.insertCell(5);
+
+        idCell.textContent = triangle.name;
+
+        const createColorInput = (value, onchange) => {
+            console.log('value')
+            console.log(value)
+            const hexColor = rgbToHex(parseInt(value.r), parseInt(value.g), parseInt(value.b))
+            const input = document.createElement('input');
+            input.type = 'color';
+            input.value = hexColor;
+            input.addEventListener('input', onchange);
+            return input;
         };
-        // Cria as células para os color pickers dos vértices
-        for (var i = 0; i < 3; i++) {
-            _loop_2(i);
-        }
-        // Cria a célula para o botão "Delete"
-        var cellDelete = row.insertCell(4);
-        var deleteButton = document.createElement('button');
-        deleteButton.innerHTML = 'Delete';
-        deleteButton.addEventListener('click', function () { return deleteTriangle(triangleId); });
-        cellDelete.appendChild(deleteButton);
+        // console.log(triangle.vertices[0].color)
+        vertex1Cell.appendChild(createColorInput(triangle.vertices[0].extractRGB(), (event) => handleColorChange(index, 0, 'vertex', event)));
+        vertex2Cell.appendChild(createColorInput(triangle.vertices[1].extractRGB(), (event) => handleColorChange(index, 1, 'vertex', event)));
+        vertex3Cell.appendChild(createColorInput(triangle.vertices[2].extractRGB(), (event) => handleColorChange(index, 2, 'vertex', event)));
+        edgeCell.appendChild(createColorInput(triangle.Edge, (event) => handleColorChange(index, null, 'edge', event)));
+
+        actionsCell.innerHTML = `<button onclick="deleteTriangle(${index})">Delete</button>`;
+    });
+}
+
+function rgbToHex(r, g, b) {
+    const toHex = (value) => {
+        const hex = value.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
     };
-    // Adiciona cada triângulo à tabela
-    for (var _i = 0, triangles_1 = triangles; _i < triangles_1.length; _i++) {
-        var vertices = triangles_1[_i];
-        _loop_1(vertices);
-    }
+
+    const hexR = toHex(r);
+    const hexG = toHex(g);
+    const hexB = toHex(b);
+
+    return `#${hexR}${hexG}${hexB}`;
 }
-// Função para tratar a alteração de cor de um vértice
-function handleColorChange(triangleId, vertexIndex, event) {
-    var colorPicker = event.target;
-    var color = colorPicker.value;
-    var index = triangles.findIndex(function (triangle) { return triangle[0].id === triangleId; });
-    if (index !== -1) {
-        var vertices = triangles[index];
-        vertices[vertexIndex].color = color;
-        // Atualiza a tabela e redesenha o canvas
-        updateTriangleTable();
-        clearTriangleFromCanvas(vertices);
-        drawTriangle(context, vertices);
+
+function handleColorChange(index, vertexIndex, type, event) {
+    const colorPicker = event.target;
+    const hexColor = colorPicker.value;
+    const rgbColor = hexToRgb(hexColor);
+
+    console.log('RGB Color:', rgbColor);
+
+    if (type === 'vertex') {
+        // Mudança de cor para um vértice específico
+        const vertices = listaPoly[index].vertices;
+        vertices[vertexIndex].color = `rgb(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b})`;
+        redrawCanvas(context);
+    } else if (type === 'edge') {
+        // Mudança de cor para a borda do polígono
+        listaPoly[index].Edge = `rgb(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b})`;
+        redrawCanvas(context);
     }
-}
-function clearTriangleFromCanvas(vertices) {
-    // Limpa apenas o triângulo especificado
-    if (context) {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        // Redesenha os triângulos restantes
-        for (var _i = 0, triangles_2 = triangles; _i < triangles_2.length; _i++) {
-            var triVertices = triangles_2[_i];
-            drawTriangle(context, triVertices);
-            // Redesenha os pontos dos triângulos restantes
-            for (var _a = 0, triVertices_1 = triVertices; _a < triVertices_1.length; _a++) {
-                var vertex = triVertices_1[_a];
-                context.beginPath();
-                context.arc(vertex.x, vertex.y, 5, 0, 2 * Math.PI);
-                context.fillStyle = vertex.color;
-                context.fill();
-                context.stroke();
-            }
-        }
-    }
-}
-function deleteTriangle(triangleId) {
-    // Encontra e remove o triângulo com o ID correspondente
-    var index = -1;
-    for (var i = 0; i < triangles.length; i++) {
-        if (triangles[i][0].id === triangleId) {
-            index = i;
-            break;
-        }
-    }
-    if (index !== -1) {
-        var deletedTriangle = triangles[index];
-        triangles.splice(index, 1);
-        updateTriangleTable();
-        clearTriangleFromCanvas(deletedTriangle);
-    }
-}
-// Event listener para o botão de limpar
-var clearButton = document.getElementById('clearButton');
-clearButton.addEventListener('click', clearCanvas);
-// Função para limpar o canvas
-function clearCanvas() {
-    if (context) {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-    }
-    triangles.length = 0; // Limpa o array de triângulos
-    currentVertices = [];
     updateTriangleTable();
 }
-function editTriangle(triangleId) {
-    var index = -1;
-    // Procura o índice do triângulo com o ID correspondente
-    for (var i = 0; i < triangles.length; i++) {
-        if (triangles[i][0].id === triangleId) {
-            index = i;
-            break;
-        }
-    }
-    if (index !== -1) {
-        var vertices = triangles[index];
-        // Pede ao usuário para inserir uma nova cor para cada vértice
-        for (var i = 0; i < vertices.length; i++) {
-            var newColor = prompt("Enter new color for vertex ".concat(i + 1, ":"), vertices[i].color);
-            if (newColor !== null) {
-                vertices[i].color = newColor;
-            }
-        }
-        // Atualiza a tabela e redesenha o canvas
-        updateTriangleTable();
-        clearTriangleFromCanvas(vertices);
-        drawTriangle(context, vertices);
-    }
+
+function hexToRgb(hex) {
+    // Remove the hash sign if present
+    hex = hex.replace(/^#/, '');
+
+    // Parse the hex values for red, green, and blue
+    let bigint = parseInt(hex, 16);
+    let r = (bigint >> 16) & 255;
+    let g = (bigint >> 8) & 255;
+    let b = bigint & 255;
+
+    return { r, g, b };
 }
-// Event listener para cliques do mouse no canvas
-canvas.addEventListener('click', function (event) {
-    var rect = canvas.getBoundingClientRect();
-    var mouseX = event.clientX - rect.left;
-    var mouseY = event.clientY - rect.top;
-    // Usa a cor selecionada
-    var pointColor = colorPicker.value;
-    // Adiciona o ponto clicado com sua cor ao array currentVertices
-    var pointId = generateUniqueId();
-    currentVertices.push({ x: mouseX, y: mouseY, color: pointColor, id: pointId });
-    // Desenha todos os triângulos armazenados
-    for (var _i = 0, triangles_3 = triangles; _i < triangles_3.length; _i++) {
-        var vertices = triangles_3[_i];
-        drawTriangle(context, vertices);
-    }
-    // Desenha os vértices para o triângulo atual
-    for (var _a = 0, currentVertices_1 = currentVertices; _a < currentVertices_1.length; _a++) {
-        var vertex = currentVertices_1[_a];
-        if (context) {
+
+function redrawCanvas(context) {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    listaPoly.forEach((triangle) => {
+        console.log('Triangle:', triangle); 
+        console.log('R:', triangle.vertices[0].extractRGB().r);
+        console.log('G:', triangle.vertices[0].extractRGB().g);
+        console.log('B:', triangle.vertices[0].extractRGB().b); // Debugging statement
+        drawTriangle(context, triangle.vertices, triangle.Edge);
+
+        // Redesenha os vértices
+        for (let i = 0; i < triangle.vertices.length; i++) {
+            const vertex = triangle.vertices[i];
+
             context.beginPath();
             context.arc(vertex.x, vertex.y, 5, 0, 2 * Math.PI);
-            // Usa a cor associada ao ponto
             context.fillStyle = vertex.color;
             context.fill();
+            context.strokeStyle = triangle.Edge;
             context.stroke();
         }
+        fillPoly(triangle, context);
+    });
+}
+
+function deleteTriangle(index) {
+    // Remove o polígono da lista pelo índice
+    listaPoly.splice(index, 1);
+
+    // Redesenha o canvas com as novas informações
+    redrawCanvas(context);
+
+    // Atualiza a tabela com as novas informações
+    updateTriangleTable();
+}
+
+function fillPoly(poly, ctx) {
+    // Cria um mapa para armazenar as interseções em cada coordenada y
+    let intersections = new Map();
+
+    const minY = Math.min(poly.vertices[0].y, poly.vertices[1].y, poly.vertices[2].y);
+    const maxY = Math.max(poly.vertices[0].y, poly.vertices[1].y, poly.vertices[2].y);
+
+    // Inicializa o mapa com arrays vazios para cada coordenada y entre os vértices
+    for (let y = minY; y < maxY; y++) {
+        intersections.set(y, []);
     }
-    // Desenha o triângulo atual se houverem três vértices presentes
-    if (currentVertices.length === 3) {
-        drawTriangle(context, currentVertices);
-        triangles.push(currentVertices);
-        currentVertices = [];
-        updateTriangleTable();
+
+    // Define as arestas do polígono
+    let edges = [
+        { start: poly.vertices[0], end: poly.vertices[1], rate: (poly.vertices[1].x - poly.vertices[0].x) / (poly.vertices[1].y - poly.vertices[0].y) },
+        { start: poly.vertices[1], end: poly.vertices[2], rate: (poly.vertices[2].x - poly.vertices[1].x) / (poly.vertices[2].y - poly.vertices[1].y) },
+        { start: poly.vertices[2], end: poly.vertices[0], rate: (poly.vertices[0].x - poly.vertices[2].x) / (poly.vertices[0].y - poly.vertices[2].y) }
+    ];
+
+    let edgesRGB = [
+        {
+            rateR: ((poly.vertices[1].extractRGB().r - poly.vertices[0].extractRGB().r) / (poly.vertices[1].y - poly.vertices[0].y)),
+            rateG: ((poly.vertices[1].extractRGB().g - poly.vertices[0].extractRGB().g) / (poly.vertices[1].y - poly.vertices[0].y)),
+            rateB: ((poly.vertices[1].extractRGB().b - poly.vertices[0].extractRGB().b) / (poly.vertices[1].y - poly.vertices[0].y))
+        },
+        {
+            rateR: ((poly.vertices[2].extractRGB().r - poly.vertices[1].extractRGB().r) / (poly.vertices[2].y - poly.vertices[1].y)),
+            rateG: ((poly.vertices[2].extractRGB().g - poly.vertices[1].extractRGB().g) / (poly.vertices[2].y - poly.vertices[1].y)),
+            rateB: ((poly.vertices[2].extractRGB().b - poly.vertices[1].extractRGB().b) / (poly.vertices[2].y - poly.vertices[1].y))
+        },
+        {
+            rateR: ((poly.vertices[0].extractRGB().r - poly.vertices[2].extractRGB().r) / (poly.vertices[0].y - poly.vertices[2].y)),
+            rateG: ((poly.vertices[0].extractRGB().g - poly.vertices[2].extractRGB().g) / (poly.vertices[0].y - poly.vertices[2].y)),
+            rateB: ((poly.vertices[0].extractRGB().b - poly.vertices[2].extractRGB().b) / (poly.vertices[0].y - poly.vertices[2].y))
+        }
+    ];
+
+    // Preenche o mapa de interseções para cada aresta
+    for (let i = 0; i < 3; i++) {
+        let initialY, endY, currentX, currentR, currentG, currentB;
+
+        if (edges[i].start.y < edges[i].end.y) {
+            initialY = edges[i].start.y;
+            endY = edges[i].end.y;
+            currentX = edges[i].start.x;
+            currentR = edges[i].start.extractRGB().r;
+            currentG = edges[i].start.extractRGB().g;
+            currentB = edges[i].start.extractRGB().b;
+        } else {
+            initialY = edges[i].end.y;
+            endY = edges[i].start.y;
+            currentX = edges[i].end.x;
+            currentR = edges[i].end.extractRGB().r;
+            currentG = edges[i].end.extractRGB().g;
+            currentB = edges[i].end.extractRGB().b;
+        }
+
+        for (let y = initialY; y < endY; y++) {
+            intersections.get(y).push({ x: currentX, r: currentR, g: currentG, b: currentB });
+            currentX += edges[i].rate;
+            currentR += edgesRGB[i].rateR;
+            currentG += edgesRGB[i].rateG;
+            currentB += edgesRGB[i].rateB;
+        }
     }
-});
+
+    // Ordena as interseções em cada linha de varredura
+    intersections.forEach((sortX) => {
+        // Create a new array with sorted values
+        const sortedX = sortX.slice().sort((a, b) => a.x - b.x);
+
+        // Replace the original array with the sorted values
+        sortX.splice(0, sortX.length, ...sortedX);
+    });
+
+    // Preenche o polígono usando as interseções
+    for (let currentY = minY; currentY < maxY; currentY++) {
+        let edge = intersections.get(currentY);
+    
+        for (let i = 0; i < edge.length; i += 2) {
+            let initialX = edge[i].x;
+            let endX = edge[i + 1].x;
+            let currentR = edge[i].r;
+            let currentG = edge[i].g;
+            let currentB = edge[i].b;
+    
+            const variationR = (edge[i + 1].r - edge[i].r) / (endX - initialX);
+            const variationG = (edge[i + 1].g - edge[i].g) / (endX - initialX);
+            const variationB = (edge[i + 1].b - edge[i].b) / (endX - initialX);
+    
+            for (let currentX = initialX; currentX < endX; currentX++) {
+                ctx.fillStyle = `rgb(${Math.round(currentR)}, ${Math.round(currentG)}, ${Math.round(currentB)})`;
+                ctx.fillRect(currentX, currentY, 1, 1);
+                currentR += variationR;
+                currentG += variationG;
+                currentB += variationB;
+            }
+        }
+    }
+}

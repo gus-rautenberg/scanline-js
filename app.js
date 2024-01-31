@@ -36,6 +36,17 @@ class Poly {
     sortVerticesByY() {
         this.vertices.sort((a, b) => b.y - a.y);
     }
+    extractRGB() {
+        // Remove os caracteres "rgb(" e ")" da string
+        const values = this.Edge.substring(4, this.Edge.length - 1).split(', ');
+    
+        // Converte os valores para números inteiros
+        const r = parseInt(values[0]);
+        const g = parseInt(values[1]);
+        const b = parseInt(values[2]);
+    
+        return { r, g, b };
+    }
 }
 
 let count = 0;
@@ -148,7 +159,9 @@ function updateTriangleTable() {
         vertex1Cell.appendChild(createColorInput(triangle.vertices[0].extractRGB(), (event) => handleColorChange(index, 0, 'vertex', event)));
         vertex2Cell.appendChild(createColorInput(triangle.vertices[1].extractRGB(), (event) => handleColorChange(index, 1, 'vertex', event)));
         vertex3Cell.appendChild(createColorInput(triangle.vertices[2].extractRGB(), (event) => handleColorChange(index, 2, 'vertex', event)));
-        edgeCell.appendChild(createColorInput(triangle.Edge, (event) => handleColorChange(index, null, 'edge', event)));
+        console.log('aqui')
+        console.log(triangle.Edge)
+        edgeCell.appendChild(createColorInput(triangle.extractRGB(), (event) => handleColorChange(index, null, 'edge', event)));
 
         actionsCell.innerHTML = `<button onclick="deleteTriangle(${index})">Delete</button>`;
     });

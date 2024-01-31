@@ -96,9 +96,10 @@ canvas.addEventListener('click', function (event) {
         listaPoly.push(currentPoly);
         console.log("TEste 1")
         console.log('Triangle:', currentPoly.vertices[0].extractRGB().r);
+        fillPoly(currentPoly, context);
         currentPoly = new Poly();
         updateTriangleTable();
-        redrawCanvas(context);
+        
     }
 });
 

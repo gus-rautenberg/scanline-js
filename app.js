@@ -188,10 +188,7 @@ function handleColorChange(index, vertexIndex, type, event) {
 }
 
 function hexToRgb(hex) {
-    // Remove the hash sign if present
     hex = hex.replace(/^#/, '');
-
-    // Parse the hex values for red, green, and blue
     let bigint = parseInt(hex, 16);
     let r = (bigint >> 16) & 255;
     let g = (bigint >> 8) & 255;
@@ -206,7 +203,7 @@ function redrawCanvas(context) {
         console.log('Triangle:', triangle); 
         console.log('R:', triangle.vertices[0].extractRGB().r);
         console.log('G:', triangle.vertices[0].extractRGB().g);
-        console.log('B:', triangle.vertices[0].extractRGB().b); // Debugging statement
+        console.log('B:', triangle.vertices[0].extractRGB().b); 
         drawTriangle(context, triangle.vertices, triangle.Edge);
 
         // Redesenha os vértices

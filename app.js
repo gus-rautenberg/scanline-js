@@ -90,8 +90,7 @@ canvas.addEventListener('click', function (event) {
         drawTriangle(context, currentPoly.vertices, currentPoly.Edge);
         currentPoly.name = "T" + count++;
         listaPoly.push(currentPoly);
-        console.log("TEste 1")
-        console.log('Triangle:', currentPoly.vertices[0].extractRGB().r);
+
         fillPoly(currentPoly, context);
         currentPoly = new Poly();
         updateTriangleTable();
@@ -153,8 +152,6 @@ function updateTriangleTable() {
         vertex1Cell.appendChild(createColorInput(triangle.vertices[0].extractRGB(), (event) => handleColorChange(index, 0, 'vertex', event)));
         vertex2Cell.appendChild(createColorInput(triangle.vertices[1].extractRGB(), (event) => handleColorChange(index, 1, 'vertex', event)));
         vertex3Cell.appendChild(createColorInput(triangle.vertices[2].extractRGB(), (event) => handleColorChange(index, 2, 'vertex', event)));
-        console.log('aqui')
-        console.log(triangle.Edge)
         edgeCell.appendChild(createColorInput(triangle.extractRGB(), (event) => handleColorChange(index, null, 'edge', event)));
 
         actionsCell.innerHTML = `<button onclick="deleteTriangle(${index})">Delete</button>`;
@@ -178,8 +175,6 @@ function handleColorChange(index, vertexIndex, type, event) {
     const colorPicker = event.target;
     const hexColor = colorPicker.value;
     const rgbColor = hexToRgb(hexColor);
-
-    console.log('RGB Color:', rgbColor);
 
     if (type === 'vertex') {
         // Mudança de cor para um vértice específico
@@ -207,10 +202,6 @@ function hexToRgb(hex) {
 function redrawCanvas(context) {
     context.clearRect(0, 0, canvas.width, canvas.height);
     listaPoly.forEach((triangle) => {
-        console.log('Triangle:', triangle); 
-        console.log('R:', triangle.vertices[0].extractRGB().r);
-        console.log('G:', triangle.vertices[0].extractRGB().g);
-        console.log('B:', triangle.vertices[0].extractRGB().b); 
         drawTriangle(context, triangle.vertices, triangle.Edge);
 
         // Redesenha os vértices

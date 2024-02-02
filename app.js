@@ -33,9 +33,6 @@ class Poly {
         this.Edge = "rgb(0, 0, 0)";
     }
 
-    // sortVerticesByY() {
-    //     this.vertices.sort((a, b) => b.y - a.y);
-    // }
     extractRGB() {
         // Remove os caracteres "rgb(" e ")" da string
         const values = this.Edge.substring(4, this.Edge.length - 1).split(', ');
@@ -92,7 +89,6 @@ canvas.addEventListener('click', function (event) {
     if (currentPoly.vertices.length === 3) {
         drawTriangle(context, currentPoly.vertices, currentPoly.Edge);
         currentPoly.name = "T" + count++;
-        // currentPoly.sortVerticesByY();
         listaPoly.push(currentPoly);
         console.log("TEste 1")
         console.log('Triangle:', currentPoly.vertices[0].extractRGB().r);
@@ -154,7 +150,6 @@ function updateTriangleTable() {
             input.addEventListener('change', onchange); // Mudança para o evento 'change'
             return input;
         };
-        // console.log(triangle.vertices[0].color)
         vertex1Cell.appendChild(createColorInput(triangle.vertices[0].extractRGB(), (event) => handleColorChange(index, 0, 'vertex', event)));
         vertex2Cell.appendChild(createColorInput(triangle.vertices[1].extractRGB(), (event) => handleColorChange(index, 1, 'vertex', event)));
         vertex3Cell.appendChild(createColorInput(triangle.vertices[2].extractRGB(), (event) => handleColorChange(index, 2, 'vertex', event)));
@@ -312,10 +307,7 @@ function fillPoly(poly, ctx) {
 
     // Ordena as interseções em cada linha de varredura
     intersections.forEach((sortX) => {
-        // Create a new array with sorted values
         const sortedX = sortX.slice().sort((a, b) => a.x - b.x);
-
-        // Replace the original array with the sorted values
         sortX.splice(0, sortX.length, ...sortedX);
     });
 
